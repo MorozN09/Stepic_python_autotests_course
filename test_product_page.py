@@ -1,6 +1,33 @@
 import pytest
 from pages.product_page import ProductPage
 from pages.basket_page import BasketPage
+from pages.login_page import LoginPage
+import time
+
+class TestUserAddToBasketFromProductPage():
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/ru/accounts/login/"
+        email = str(time.time()) + "@fakemail.net"
+        password = "pass" + str(time.time())
+        login_page = LoginPage(browser, link)
+        login_page.open()
+        login_page.register_new_user(email, password)
+        login_page.should_be_authorized_user()
+
+    def test_user_can_add_product_to_basket(self, browser):
+        self.link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/"
+        page = ProductPage(browser, self.link)
+        page.open()
+        page.add_product_to_cart()
+        page.should_be_add_to_cart_message()
+        page.should_be_cart_price_message()
+
+    def test_user_cant_see_success_message(self, browser):
+        self.link = "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207"
+        page = ProductPage(browser, self.link)
+        page.open()
+        page.should_not_be_success_message()
 
 @pytest.mark.parametrize('link', ["0","1", "2", "3", "4", "5", "6", pytest.param("7", marks=pytest.mark.xfail), "8", "9"])
 def test_guest_can_add_product_to_basket(browser, link):
